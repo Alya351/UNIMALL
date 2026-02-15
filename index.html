@@ -1,0 +1,1185 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UNIMALL | Supermarché complet - Promotions, Épicerie, Chaussures, Tout</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Header -->
+    <header class="navbar">
+        <div class="container header-container">
+            <a href="index.html" class="logo">
+                <img src="https://i.ibb.co/b5BXdfBG/logo-unimall.png" alt="UNIMALL Logo" class="logo-img">
+                <div class="logo-text">UNI<span>MALL</span></div>
+            </a>
+            <button class="menu-toggle" id="menuToggle" aria-label="Menu">
+    <i class="fas fa-bars"></i>
+</button>
+<div class="menu-overlay" id="menuOverlay"></div>
+            
+            <nav>
+                <ul>
+                    <li><a href="#" id="homeLink" class="active"><i class="fas fa-home"></i> Accueil</a></li>
+                    <li><a href="#promotions"><i class="fas fa-fire"></i> Promotions</a></li>
+                    <li><a href="#rayons"><i class="fas fa-store"></i> Nos Rayons</a></li>
+                    <li><a href="#delivery"><i class="fas fa-truck"></i> Livraison</a></li>
+                </ul>
+            </nav>
+            
+            <!-- Barre de recherche -->
+            <div class="search-wrapper" id="searchWrapper">
+                <div class="search-bar">
+                    <i class="fas fa-search search-icon"></i>
+                    <input type="text" id="searchInput" placeholder="Rechercher un produit..." autocomplete="off" aria-label="Rechercher">
+                    <button class="search-clear" id="searchClear" aria-label="Effacer"><i class="fas fa-times"></i></button>
+                </div>
+                <div class="search-suggestions" id="searchSuggestions"></div>
+            </div>
+
+            <div class="header-actions">
+                <button class="search-toggle-btn" id="searchToggleBtn" aria-label="Rechercher">
+                    <i class="fas fa-search"></i>
+                </button>
+                <a href="#" id="cartIcon" class="cart-link" aria-label="Panier">
+                    <i class="fas fa-shopping-cart"></i>
+                    <span id="headerCartCount" class="cart-count">0</span>
+                </a>
+            </div>
+        </div>
+        <div class="sync-indicator" id="syncIndicator" style="display: none;">
+            <i class="fas fa-sync-alt fa-spin"></i>
+            <span>Mise à jour des produits...</span>
+        </div>
+    </header>
+
+    <!-- Overlay pour le panier -->
+    <div class="cart-overlay" id="cartOverlay"></div>
+
+    <!-- Panier latéral -->
+    <section id="cartSection" class="cart-panel">
+        <div class="cart-header">
+            <h2><i class="fas fa-shopping-cart"></i> Mon panier</h2>
+            <button id="closeCart" title="Fermer le panier" aria-label="Fermer le panier"><i class="fas fa-times"></i></button>
+        </div>
+
+        <div id="cartItems" class="cart-items">
+            <!-- Les articles du panier seront insérés ici dynamiquement -->
+        </div>
+
+        <div class="cart-footer">
+            <div class="cart-total">
+                <span>Total :</span>
+                <span id="cartTotal">0</span> FCFA
+            </div>
+            <button class="checkout-btn" id="checkoutBtn">
+                <i class="fas fa-shopping-bag"></i>
+                Commander maintenant
+            </button>
+            <a href="#" class="continue-shopping" id="continueShopping">
+                <i class="fas fa-arrow-left"></i>
+                Continuer mes achats
+            </a>
+        </div>
+    </section>
+
+    <!-- Page résultats recherche -->
+    <div id="searchResultsPage" style="display:none;">
+        <div class="search-results-hero">
+            <div class="container">
+                <div class="search-results-header">
+                    <button class="search-back-btn" id="searchBackBtn"><i class="fas fa-arrow-left"></i> Retour</button>
+                    <div>
+                        <h2 id="searchResultsTitle">Résultats</h2>
+                        <p id="searchResultsCount" class="search-results-meta"></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="container" style="padding: 30px 20px 60px;">
+            <div class="search-filters" id="searchFilters"></div>
+            <div class="search-results-grid" id="searchResultsGrid"></div>
+            <div class="search-no-results" id="searchNoResults" style="display:none;">
+                <i class="fas fa-search-minus"></i>
+                <h3>Aucun produit trouvé</h3>
+                <p id="searchNoResultsText"></p>
+                <button class="btn" onclick="clearSearch()"><i class="fas fa-redo"></i> Voir tous les produits</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Page de commande (cachée par défaut) -->
+    <div id="checkoutPage" class="checkout-page">
+        <section class="checkout-hero">
+            <div class="container">
+                <h1>Finaliser votre commande</h1>
+                <p>Vérifiez vos informations et finalisez votre achat</p>
+            </div>
+        </section>
+        
+        <div class="container checkout-container">
+            <div class="checkout-steps">
+                <div class="step active" id="step1">
+                    <div class="step-number">1</div>
+                    <div class="step-title">Informations</div>
+                </div>
+                <div class="step" id="step2">
+                    <div class="step-number">2</div>
+                    <div class="step-title">Livraison</div>
+                </div>
+                <div class="step" id="step3">
+                    <div class="step-number">3</div>
+                    <div class="step-title">Paiement</div>
+                </div>
+                <div class="step" id="step4">
+                    <div class="step-number">4</div>
+                    <div class="step-title">Confirmation</div>
+                </div>
+            </div>
+            
+            <div class="checkout-layout">
+                <div class="checkout-form">
+                    <!-- Étape 1: Informations personnelles -->
+                    <div id="step1-content" class="checkout-form-section">
+                        <h2 class="form-section-title"><i class="fas fa-user"></i> Vos informations</h2>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="nom">Nom *</label>
+                                <input type="text" id="nom" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="prenom">Prénom *</label>
+                                <input type="text" id="prenom" required>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="telephone">Téléphone *</label>
+                            <input type="tel" id="telephone" required pattern="[0-9]{8,10}" maxlength="10" placeholder="Ex: 70123456">
+                            <div class="form-help">Numéro de téléphone (8 à 10 chiffres)</div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="email">Email</label>
+                            <input type="email" id="email">
+                            <div class="form-help">Pour recevoir la confirmation de commande</div>
+                        </div>
+                        
+                        <div class="form-actions">
+                            <button class="btn" onclick="nextStep(2)">
+                                Continuer <i class="fas fa-arrow-right"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Étape 2: Livraison -->
+                    <div id="step2-content" class="checkout-form-section" style="display: none;">
+                        <h2 class="form-section-title"><i class="fas fa-truck"></i> Livraison</h2>
+                        
+                        <div class="form-group">
+                            <label for="adresse">Adresse de livraison *</label>
+                            <input type="text" id="adresse" required>
+                        </div>
+                        
+                        <div class="form-row">
+    <div class="form-group">
+        <label for="quartier">Quartier *</label>
+        <input type="text" id="quartier" required>
+    </div>
+    
+    <div class="form-group">
+        <label for="ville">Ville *</label>
+        <input type="text" id="ville" value="Ouagadougou" readonly>
+    </div>
+</div>
+
+<!-- NOUVEAUX CHAMPS CACHÉS POUR LES LIENS MAPS -->
+<input type="hidden" id="mapsLink" name="mapsLink" value="">
+<input type="hidden" id="coordinates" name="coordinates" value="">
+
+                        
+                        <!-- Section localisation -->
+                        <div class="form-group">
+                            <label>Localisation automatique</label>
+                            <div class="location-controls">
+                                <button type="button" id="getLocationBtn" class="btn-location">
+                                    <i class="fas fa-location-crosshairs"></i>
+                                    Utiliser ma position actuelle
+                                </button>
+                                <div class="location-status" id="locationStatus"></div>
+                            </div>
+                            <div class="form-help" style="margin-top: 8px;">
+                                📍 La détection de position permet au livreur de calculer la distance exacte et de fixer le prix de livraison
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="instructions">Instructions de livraison</label>
+                            <textarea id="instructions" rows="3" placeholder="Ex: Sonner 3 fois, Appeler avant de venir, etc."></textarea>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Mode de livraison</label>
+                            <div class="payment-methods">
+                                <div class="payment-method" onclick="selectDelivery(this)">
+                                    <label>
+                                        <input type="radio" name="delivery" value="standard" checked>
+                                        <i class="fas fa-bike payment-icon"></i>
+                                        <div>
+                                            <div><strong>Livraison standard</strong></div>
+                                            <div>24-48h • Prix à définir avec le livreur</div>
+                                        </div>
+                                    </label>
+                                </div>
+                                <div class="payment-method" onclick="selectDelivery(this)">
+                                    <label>
+                                        <input type="radio" name="delivery" value="express">
+                                        <i class="fas fa-rocket payment-icon"></i>
+                                        <div>
+                                            <div><strong>Livraison express</strong></div>
+                                            <div>2-4h • Prix à définir avec le livreur</div>
+                                        </div>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="form-actions">
+                            <button class="btn btn-secondary" onclick="prevStep(1)">
+                                <i class="fas fa-arrow-left"></i> Retour
+                            </button>
+                            <button class="btn" onclick="nextStep(3)">
+                                Continuer <i class="fas fa-arrow-right"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Étape 3: Paiement -->
+                    <div id="step3-content" class="checkout-form-section" style="display: none;">
+                        <h2 class="form-section-title"><i class="fas fa-credit-card"></i> Paiement</h2>
+                        
+                        <div class="form-group">
+                            <label>Mode de paiement</label>
+                            <div class="payment-methods">
+                                <div class="payment-method" onclick="selectPayment(this)">
+                                    <label>
+                                        <input type="radio" name="payment" value="cash" checked>
+                                        <i class="fas fa-money-bill-wave payment-icon"></i>
+                                        <div>
+                                            <div><strong>Paiement à la livraison</strong></div>
+                                            <div>Espèces ou Mobile Money</div>
+                                        </div>
+                                    </label>
+                                </div>
+                                <div class="payment-method" onclick="selectPayment(this)">
+                                    <label>
+                                        <input type="radio" name="payment" value="mobile">
+                                        <i class="fas fa-mobile-alt payment-icon"></i>
+                                        <div>
+                                            <div><strong>Mobile Money</strong></div>
+                                            <div>Orange Money, Moov Money</div>
+                                        </div>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div id="mobile-money-details" style="display: none;">
+                            <div class="form-group">
+                                <label for="mobile-number">Numéro de téléphone *</label>
+                                <input type="tel" id="mobile-number" placeholder="Ex: 70 12 34 56">
+                            </div>
+                            <div class="form-group">
+                                <label for="mobile-provider">Opérateur *</label>
+                                <select id="mobile-provider">
+                                    <option value="">Sélectionnez</option>
+                                    <option value="orange">Orange Money</option>
+                                    <option value="moov">Moov Money</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>
+                                <input type="checkbox" id="terms" required>
+                                J'accepte les <a href="#">conditions générales de vente</a> *
+                            </label>
+                        </div>
+                        
+                        <div class="form-actions">
+                            <button class="btn btn-secondary" onclick="prevStep(2)">
+                                <i class="fas fa-arrow-left"></i> Retour
+                            </button>
+                            <button class="btn" onclick="placeOrder()">
+                                <i class="fas fa-check"></i>
+                                Confirmer la commande
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Étape 4: Confirmation -->
+                    <div id="step4-content" class="checkout-form-section" style="display: none;">
+                        <div class="order-confirmation">
+                            <div class="confirmation-icon">
+                                <i class="fas fa-check-circle"></i>
+                            </div>
+                            <h2 class="confirmation-title">Commande confirmée !</h2>
+                            <p>Votre commande a été passée avec succès.</p>
+                            
+                            <div class="order-number">
+                                Commande #<span id="orderId">UNI2023</span>
+                            </div>
+                            
+                            <div class="order-details">
+                                <h3>Récapitulatif de votre commande</h3>
+                                <div id="orderSummary"></div>
+                                <div class="summary-total" style="margin-top: 20px;">
+                                    Total : <span id="orderTotal">0</span> FCFA
+                                </div>
+                            </div>
+                            
+                            <p>Vous recevrez un SMS de confirmation sous peu.</p>
+                            
+                            <div style="margin-top: 30px;">
+                                <button class="btn" onclick="goToHome()">
+                                    <i class="fas fa-home"></i>
+                                    Retour à l'accueil
+                                </button>
+                                <button class="btn btn-secondary" onclick="window.print()">
+                                    <i class="fas fa-print"></i>
+                                    Imprimer la confirmation
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Contenu principal (page d'accueil) -->
+    <div id="mainContent">
+        <!-- Hero Slider -->
+        <section class="hero-slider" id="heroSlider">
+            <div class="slider-track" id="sliderTrack">
+
+                <!-- Slide 1 — Livraison à domicile (FOCUS PRINCIPAL) -->
+                <div class="slide" style="background-image: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.6)), url('https://images.unsplash.com/photo-1566576721346-d4a3b4eaeb55?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80');">
+                    <div class="slide-content">
+                        <div class="slide-badge"><i class="fas fa-truck"></i> Livraison à domicile</div>
+                        <h1>Votre supermarché vous rejoint chez vous !</h1>
+                        <p>Commandez en ligne depuis votre téléphone et recevez tout à votre porte. Simple, rapide et pratique.</p>
+                        <div class="slide-btns">
+                            <a href="#rayons" class="btn"><i class="fas fa-shopping-cart"></i> Commander maintenant</a>
+                            <a href="#delivery" class="btn btn-secondary"><i class="fas fa-info-circle"></i> Comment ça marche ?</a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Slide 2 — Courses en ligne confortables -->
+                <div class="slide" style="background-image: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.6)), url('https://images.unsplash.com/photo-1609081219090-a6d81d3085bf?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80');">
+                    <div class="slide-content">
+                        <div class="slide-badge"><i class="fas fa-mobile-alt"></i> Shopping en ligne</div>
+                        <h1>Faites vos courses depuis votre canapé</h1>
+                        <p>Plus besoin de vous déplacer ! Parcourez nos rayons en ligne et commandez en quelques clics.</p>
+                        <div class="slide-btns">
+                            <a href="#rayons" class="btn"><i class="fas fa-store"></i> Explorer les produits</a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Slide 3 — Promotions exceptionnelles -->
+                <div class="slide" style="background-image: linear-gradient(rgba(230, 81, 0, 0.7), rgba(191, 54, 12, 0.8)), url('https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80');">
+                    <div class="slide-content">
+                        <div class="slide-badge"><i class="fas fa-fire"></i> Promotions</div>
+                        <h1>Jusqu'à -50% + Livraison gratuite</h1>
+                        <p>Profitez de nos offres exclusives en ligne ! Économisez encore plus en commandant depuis chez vous.</p>
+                        <div class="slide-btns">
+                            <a href="#promotions" class="btn btn-promo"><i class="fas fa-tags"></i> Voir les promos</a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Slide 4 — Paiement à la livraison -->
+                <div class="slide" style="background-image: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.7)), url('https://images.unsplash.com/photo-1556742044-3c52d6e88c62?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80');">
+                    <div class="slide-content">
+                        <div class="slide-badge"><i class="fas fa-money-bill-wave"></i> Paiement facile</div>
+                        <h1>Payez à la réception de votre commande</h1>
+                        <p>Commandez maintenant, payez quand le livreur arrive. Espèces ou Mobile Money acceptés.</p>
+                        <div class="slide-btns">
+                            <a href="#delivery" class="btn"><i class="fas fa-check-circle"></i> Commander en toute sécurité</a>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Boutons prev / next -->
+            <button class="slider-btn prev" id="sliderPrev" aria-label="Précédent">
+                <i class="fas fa-chevron-left"></i>
+            </button>
+            <button class="slider-btn next" id="sliderNext" aria-label="Suivant">
+                <i class="fas fa-chevron-right"></i>
+            </button>
+
+            <!-- Points de navigation -->
+            <div class="slider-dots" id="sliderDots"></div>
+
+            <!-- Barre de progression -->
+            <div class="slider-progress" id="sliderProgress"></div>
+        </section>
+
+        <!-- Promotions Banner -->
+        <section class="promo-banner">
+            <div class="container">
+                <div class="promo-banner-content">
+                    <h2><i class="fas fa-fire"></i> PROMOTIONS EXCEPTIONNELLES <i class="fas fa-fire"></i></h2>
+                    <p>Découvrez nos offres spéciales avec des réductions allant jusqu'à -50% ! Offres valables jusqu'à épuisement des stocks.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Promotions Section -->
+        <section class="promotions" id="promotions">
+            <div class="container">
+                <div class="section-header">
+                    <h2 class="promo-title">Promotions du Moment</h2>
+                    <p class="section-subtitle">Profitez de ces offres spéciales sur une sélection de nos meilleurs produits. Des prix imbattables pour des produits de qualité !</p>
+                </div>
+                
+                <div class="promo-grid">
+                    <!-- Produits promotionnels -->
+                    <div class="promo-card">
+                        <div class="promo-image">
+                            <div class="promo-badge">Promo Flash</div>
+                            <div class="discount-badge">-30%</div>
+                            <img src="https://i.ibb.co/d0r3Sk8T/promo1.jpg" alt="Voiture pour enfants">
+                        </div>
+                        <div class="promo-content">
+                            <h3 class="promo-product-title">Voiture pour enfants</h3>
+                            <p class="promo-product-description">Voiture de qualité pour les enfants de 3 à 10 ans</p>
+                            <div class="promo-price">
+                                <div class="current-price">108 000 FCFA</div>
+                                <div class="old-price">120 000 FCFA</div>
+                            </div>
+                            <button class="btn-add-to-cart-promo" data-product-id="1">
+                                <i class="fas fa-cart-plus"></i> Ajouter au panier
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="promo-card">
+                        <div class="promo-image">
+                            <div class="promo-badge">Meilleure vente</div>
+                            <div class="discount-badge">-25%</div>
+                            <img src="https://i.ibb.co/FkPJHcrp/promo2.jpg" alt="Motocyclette">
+                        </div>
+                        <div class="promo-content">
+                            <h3 class="promo-product-title">Motocyclette pour enfants</h3>
+                            <p class="promo-product-description">Motocyclette pour enfants de 3 à 10 ans</p>
+                            <div class="promo-price">
+                                <div class="current-price">126 000 FCFA</div>
+                                <div class="old-price">140 000 FCFA</div>
+                            </div>
+                            <button class="btn-add-to-cart-promo" data-product-id="2">
+                                <i class="fas fa-cart-plus"></i> Ajouter au panier
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="promo-card">
+                        <div class="promo-image">
+                            <div class="promo-badge">Exclusif</div>
+                            <div class="discount-badge">-40%</div>
+                            <img src="https://i.ibb.co/0VWtcWnz/promo3.jpg" alt="Velo enfant">
+                        </div>
+                        <div class="promo-content">
+                            <h3 class="promo-product-title">Velo enfants</h3>
+                            <p class="promo-product-description">Vélo pour enfants de 3 à 10 ans, avec roues de 12 pouces</p>
+                            <div class="promo-price">
+                                <div class="current-price">88 000 FCFA</div>
+                                <div class="old-price">110 000 FCFA</div>
+                            </div>
+                            <button class="btn-add-to-cart-promo" data-product-id="3">
+                                <i class="fas fa-cart-plus"></i> Ajouter au panier
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="promo-card">
+                        <div class="promo-image">
+                            <div class="promo-badge">Nouveau</div>
+                            <div class="discount-badge">-20%</div>
+                            <img src="https://i.ibb.co/ycsm73Vn/promo4.jpg" alt="Marmite ou réchaud à fondue">
+                        </div>
+                        <div class="promo-content">
+                            <h3 class="promo-product-title">Marmite ou réchaud à fondue</h3>
+                            <p class="promo-product-description">Marmite ou réchaud à fondue en acier inoxydable</p>
+                            <div class="promo-price">
+                                <div class="current-price">8 800 FCFA</div>
+                                <div class="old-price">11 000 FCFA</div>
+                            </div>
+                            <button class="btn-add-to-cart-promo" data-product-id="4">
+                                <i class="fas fa-cart-plus"></i> Ajouter au panier
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="promo-card">
+                        <div class="promo-image">
+                            <div class="promo-badge">Limité</div>
+                            <div class="discount-badge">-35%</div>
+                            <img src="https://i.ibb.co/S75WWsn8/promo5.jpg" alt="Poêle à frire">
+                        </div>
+                        <div class="promo-content">
+                            <h3 class="promo-product-title">Poêle à frire - GF Marble</h3>
+                            <p class="promo-product-description">Poêle à frire en acier inoxydable, idéal pour les repas rapides</p>
+                            <div class="promo-price">
+                                <div class="current-price">8 400 FCFA</div>
+                                <div class="old-price">10 500 FCFA</div>
+                            </div>
+                            <button class="btn-add-to-cart-promo" data-product-id="5">
+                                <i class="fas fa-cart-plus"></i> Ajouter au panier
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="promo-card">
+                        <div class="promo-image">
+                            <div class="promo-badge">Spécial</div>
+                            <div class="discount-badge">-15%</div>
+                            <img src="https://i.ibb.co/rKhm9TtC/promo6.jpg" alt="Saut à champagne ou à glace">
+                        </div>
+                        <div class="promo-content">
+                            <h3 class="promo-product-title">Saut à champagne ou à glace</h3>
+                            <p class="promo-product-description">Idéal pour maintenir les bouteilles aux frais avec de la glace</p>
+                            <div class="promo-price">
+                                <div class="current-price">9 600 FCFA</div>
+                                <div class="old-price">11 200 FCFA</div>
+                            </div>
+                            <button class="btn-add-to-cart-promo" data-product-id="6">
+                                <i class="fas fa-cart-plus"></i> Ajouter au panier
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="promo-card">
+                        <div class="promo-image">
+                            <div class="promo-badge">Flash</div>
+                            <div class="discount-badge">-50%</div>
+                            <img src="https://i.ibb.co/LXrfhLYz/promo7.jpg" alt="Moulin à café manuel">
+                        </div>
+                        <div class="promo-content">
+                            <h3 class="promo-product-title">Moulin à café manuel</h3>
+                            <p class="promo-product-description">Pour moudre le café à la demande et conserver son arôme</p>
+                            <div class="promo-price">
+                                <div class="current-price">6 000 FCFA</div>
+                                <div class="old-price">12 000 FCFA</div>
+                            </div>
+                            <button class="btn-add-to-cart-promo" data-product-id="7">
+                                <i class="fas fa-cart-plus"></i> Ajouter au panier
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="promo-card">
+                        <div class="promo-image">
+                            <div class="promo-badge">Dernière chance</div>
+                            <div class="discount-badge">-45%</div>
+                            <img src="https://i.ibb.co/8DJb3z14/promo8.jpg" alt="Mini barbecue à charbon">
+                        </div>
+                        <div class="promo-content">
+                            <h3 class="promo-product-title">Mini barbecue à charbon portable</h3>
+                            <p class="promo-product-description">Idéal pour les repas en plein air et les fêtes</p>
+                            <div class="promo-price">
+                                <div class="current-price">14 000 FCFA</div>
+                                <div class="old-price">18 000 FCFA</div>
+                            </div>
+                            <button class="btn-add-to-cart-promo" data-product-id="8">
+                                <i class="fas fa-cart-plus"></i> Ajouter au panier
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="promo-card">
+                        <div class="promo-image">
+                            <div class="promo-badge">Économie</div>
+                            <div class="discount-badge">-30%</div>
+                            <img src="https://i.ibb.co/4gZq67D2/promo9.jpg" alt="Poussette bébé">
+                        </div>
+                        <div class="promo-content">
+                            <h3 class="promo-product-title">Poussette pour bébé</h3>
+                            <p class="promo-product-description">Poussette légère et facile à transporter pour les bébés</p>
+                            <div class="promo-price">
+                                <div class="current-price">32 000 FCFA</div>
+                                <div class="old-price">40 000 FCFA</div>
+                            </div>
+                            <button class="btn-add-to-cart-promo" data-product-id="9">
+                                <i class="fas fa-cart-plus"></i> Ajouter au panier
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Navigation entre les rayons -->
+        <section class="rayons-navigation" id="rayons">
+            <div class="container">
+                <div class="rayons-nav-container">
+                    <a href="#epicerie" class="rayon-nav-link" data-rayon="epicerie">
+                        <i class="fas fa-shopping-basket"></i> Épicerie
+                    </a>
+                    <a href="#viandes" class="rayon-nav-link" data-rayon="viandes">
+                        <i class="fas fa-drumstick-bite"></i> Viandes & Poulet
+                    </a>
+                    <a href="#boissons" class="rayon-nav-link" data-rayon="boissons">
+                        <i class="fas fa-wine-bottle"></i> Boissons
+                    </a>
+                    <a href="#hygiene" class="rayon-nav-link" data-rayon="hygiene">
+                        <i class="fas fa-pump-soap"></i> Hygiène & Beauté
+                    </a>
+                    <a href="#electromenager" class="rayon-nav-link" data-rayon="electromenager">
+                        <i class="fas fa-blender"></i> Électroménager
+                    </a>
+                    <a href="#chaussures" class="rayon-nav-link" data-rayon="chaussures">
+                        <i class="fas fa-shoe-prints"></i> Chaussures
+                    </a>
+                    <a href="#vetements" class="rayon-nav-link" data-rayon="vetements">
+                        <i class="fas fa-tshirt"></i> Vêtements
+                    </a>
+                    <a href="#maison" class="rayon-nav-link" data-rayon="maison">
+                        <i class="fas fa-couch"></i> Maison & Déco
+                    </a>
+                    <a href="#bebe" class="rayon-nav-link" data-rayon="bebe">
+                        <i class="fas fa-baby"></i> Bébé & Enfants
+                    </a>
+                    <a href="#bricolage" class="rayon-nav-link" data-rayon="bricolage">
+                        <i class="fas fa-tools"></i> Jardin & Bricolage
+                    </a>
+                    <a href="#delivery" class="rayon-nav-link" data-rayon="delivery">
+                        <i class="fas fa-truck"></i> Livraison
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section Épicerie -->
+        <section class="rayon-section" id="epicerie">
+            <div class="container">
+                <div class="rayon-header">
+                    <h2 class="rayon-title">
+                        <i class="fas fa-shopping-basket"></i> Rayon Épicerie
+                    </h2>
+                    <a href="#" class="voir-plus-btn">
+                        Voir plus <i class="fas fa-arrow-right"></i>
+                    </a>
+                </div>
+                
+                <div class="rayon-products-grid">
+                    <div class="product-card">
+                        <div class="product-image">
+                            <img src="https://i.ibb.co/nNCfJB9L/riz1.jpg" alt="Riz 5kg">
+                        </div>
+                        <div class="product-content">
+                            <h3 class="product-title">Riz 5kg</h3>
+                            <div class="product-price">
+                                <span class="product-current-price">5 500 FCFA</span>
+                            </div>
+                            <p class="product-description">Riz de bonne qualité pour la famille.</p>
+                            <button class="btn-add-to-cart-product" data-product-id="103">
+                                <i class="fas fa-cart-plus"></i> Ajouter au panier
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="product-card">
+                        <div class="product-image">
+                            <img src="https://i.ibb.co/S4ynRh67/Huile-Vegetale-700x700.webp" alt="Huile végétale 1L">
+                        </div>
+                        <div class="product-content">
+                            <h3 class="product-title">Huile végétale 1L</h3>
+                            <div class="product-price">
+                                <span class="product-current-price">1 800 FCFA</span>
+                            </div>
+                            <p class="product-description">Huile végétale pour cuisson.</p>
+                            <button class="btn-add-to-cart-product" data-product-id="104">
+                                <i class="fas fa-cart-plus"></i> Ajouter au panier
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section Viandes & Poulet -->
+        <section class="rayon-section" id="viandes">
+            <div class="container">
+                <div class="rayon-header">
+                    <h2 class="rayon-title">
+                        <i class="fas fa-drumstick-bite"></i> Rayon Viandes & Poulet
+                    </h2>
+                    <a href="#" class="voir-plus-btn">
+                        Voir plus <i class="fas fa-arrow-right"></i>
+                    </a>
+                </div>
+                
+                <div class="rayon-products-grid">
+                    <div class="product-card">
+                        <div class="product-image">
+                            <img src="https://i.ibb.co/p6wNMW9h/poulet-entier-cru-frais-sur-le-fond-blanc-125776481.webp" alt="Poulet frais entier">
+                        </div>
+                        <div class="product-content">
+                            <h3 class="product-title">Poulet frais entier</h3>
+                            <div class="product-price">
+                                <span class="product-current-price">8 000 FCFA</span>
+                            </div>
+                            <p class="product-description">Poulet entier prêt à cuire.</p>
+                            <button class="btn-add-to-cart-product" data-product-id="105">
+                                <i class="fas fa-cart-plus"></i> Ajouter au panier
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="product-card">
+                        <div class="product-image">
+                            <img src="https://i.ibb.co/Z1FsvcD6/steak.jpg" alt="Steak de bœuf (1kg)">
+                        </div>
+                        <div class="product-content">
+                            <h3 class="product-title">Steak de bœuf (1kg)</h3>
+                            <div class="product-price">
+                                <span class="product-current-price">12 000 FCFA</span>
+                            </div>
+                            <p class="product-description">Steak de bœuf pour grillades.</p>
+                            <button class="btn-add-to-cart-product" data-product-id="106">
+                                <i class="fas fa-cart-plus"></i> Ajouter au panier
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section Boissons -->
+        <section class="rayon-section" id="boissons">
+            <div class="container">
+                <div class="rayon-header">
+                    <h2 class="rayon-title">
+                        <i class="fas fa-wine-bottle"></i> Rayon Boissons
+                    </h2>
+                    <a href="#" class="voir-plus-btn">
+                        Voir plus <i class="fas fa-arrow-right"></i>
+                    </a>
+                </div>
+                
+                <div class="rayon-products-grid">
+                    <div class="product-card">
+                        <div class="product-image">
+                            <img src="https://i.ibb.co/mVSfzhPz/eau-mineral.jpg" alt="Eau minérale 1.5L">
+                        </div>
+                        <div class="product-content">
+                            <h3 class="product-title">Eau minérale 1.5L</h3>
+                            <div class="product-price">
+                                <span class="product-current-price">300 FCFA</span>
+                            </div>
+                            <p class="product-description">Eau minérale pour toute la famille.</p>
+                            <button class="btn-add-to-cart-product" data-product-id="107">
+                                <i class="fas fa-cart-plus"></i> Ajouter au panier
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="product-card">
+                        <div class="product-image">
+                            <img src="https://i.ibb.co/S4SKgmJ3/bouteilles-de-boissons-gazeuses-global-brands-2hnmmgy.jpg" alt="Boisson gazeuse 50cl">
+                        </div>
+                        <div class="product-content">
+                            <h3 class="product-title">Boisson gazeuse 50cl</h3>
+                            <div class="product-price">
+                                <span class="product-current-price">500 FCFA</span>
+                            </div>
+                            <p class="product-description">Boisson rafraîchissante.</p>
+                            <button class="btn-add-to-cart-product" data-product-id="108">
+                                <i class="fas fa-cart-plus"></i> Ajouter au panier
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section Hygiène & Beauté -->
+        <section class="rayon-section" id="hygiene">
+            <div class="container">
+                <div class="rayon-header">
+                    <h2 class="rayon-title">
+                        <i class="fas fa-pump-soap"></i> Rayon Hygiène & Beauté
+                    </h2>
+                    <a href="#" class="voir-plus-btn">
+                        Voir plus <i class="fas fa-arrow-right"></i>
+                    </a>
+                </div>
+                
+                <div class="rayon-products-grid">
+                    <div class="product-card">
+                        <div class="product-image">
+                            <img src="https://i.ibb.co/v4p3mrrP/ultra-hydratant-gel-douche-500ml-topicrem.jpg" alt="Gel douche 500ml">
+                        </div>
+                        <div class="product-content">
+                            <h3 class="product-title">Gel douche 500ml</h3>
+                            <div class="product-price">
+                                <span class="product-current-price">1 500 FCFA</span>
+                            </div>
+                            <p class="product-description">Gel douche pour tous types de peau.</p>
+                            <button class="btn-add-to-cart-product" data-product-id="109">
+                                <i class="fas fa-cart-plus"></i> Ajouter au panier
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="product-card">
+                        <div class="product-image">
+                            <img src="https://i.ibb.co/Zpf9fjHV/shampoing.webp" alt="Shampooing 400ml">
+                        </div>
+                        <div class="product-content">
+                            <h3 class="product-title">Shampooing 400ml</h3>
+                            <div class="product-price">
+                                <span class="product-current-price">2 500 FCFA</span>
+                            </div>
+                            <p class="product-description">Shampooing nourrissant pour cheveux.</p>
+                            <button class="btn-add-to-cart-product" data-product-id="110">
+                                <i class="fas fa-cart-plus"></i> Ajouter au panier
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section Électroménager -->
+        <section class="rayon-section" id="electromenager">
+            <div class="container">
+                <div class="rayon-header">
+                    <h2 class="rayon-title">
+                        <i class="fas fa-blender"></i> Rayon Électroménager
+                    </h2>
+                    <a href="#" class="voir-plus-btn">
+                        Voir plus <i class="fas fa-arrow-right"></i>
+                    </a>
+                </div>
+                
+                <div class="rayon-products-grid">
+                    <div class="product-card">
+                        <div class="product-image">
+                            <img src="https://i.ibb.co/cShrgvgB/ventilo.jpg" alt="Ventilateur sur pied">
+                        </div>
+                        <div class="product-content">
+                            <h3 class="product-title">Ventilateur sur pied</h3>
+                            <div class="product-price">
+                                <span class="product-current-price">18 000 FCFA</span>
+                            </div>
+                            <p class="product-description">Ventilateur puissant pour la chaleur.</p>
+                            <button class="btn-add-to-cart-product" data-product-id="111">
+                                <i class="fas fa-cart-plus"></i> Ajouter au panier
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section Chaussures -->
+        <section class="rayon-section" id="chaussures">
+            <div class="container">
+                <div class="rayon-header">
+                    <h2 class="rayon-title">
+                        <i class="fas fa-shoe-prints"></i> Rayon Chaussures
+                    </h2>
+                    <a href="#" class="voir-plus-btn">
+                        Voir plus <i class="fas fa-arrow-right"></i>
+                    </a>
+                </div>
+                
+                <div class="rayon-products-grid">
+                    <div class="product-card">
+                        <div class="product-image">
+                            <img src="https://i.ibb.co/JWVnxwbt/chaussure.avif" alt="Chaussures tennis homme">
+                        </div>
+                        <div class="product-content">
+                            <h3 class="product-title">Chaussures tennis homme</h3>
+                            <div class="product-price">
+                                <span class="product-current-price">15 000 FCFA</span>
+                            </div>
+                            <p class="product-description">Baskets confortables pour homme. Taille 42</p>
+                            <button class="btn-add-to-cart-product" data-product-id="112">
+                                <i class="fas fa-cart-plus"></i> Ajouter au panier
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section Vêtements -->
+        <section class="rayon-section" id="vetements">
+            <div class="container">
+                <div class="rayon-header">
+                    <h2 class="rayon-title">
+                        <i class="fas fa-tshirt"></i> Rayon Vêtements
+                    </h2>
+                    <a href="#" class="voir-plus-btn">
+                        Voir plus <i class="fas fa-arrow-right"></i>
+                    </a>
+                </div>
+                
+                <div class="rayon-products-grid">
+                    <div class="product-card">
+                        <div class="product-image">
+                            <img src="https://i.ibb.co/DPM0SBbP/t-shirt-coton-bio-homme-blanc.jpg" alt="T-shirt coton homme">
+                        </div>
+                        <div class="product-content">
+                            <h3 class="product-title">T-shirt coton homme</h3>
+                            <div class="product-price">
+                                <span class="product-current-price">8 000 FCFA</span>
+                            </div>
+                            <p class="product-description">T-shirt coton pour homme, usage quotidien. Taille S</p>
+                            <button class="btn-add-to-cart-product" data-product-id="101">
+                                <i class="fas fa-cart-plus"></i> Ajouter au panier
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="product-card">
+                        <div class="product-image">
+                            <img src="https://i.ibb.co/ycprZRWM/robe-boheme-legere-classe-02.webp" alt="Robe légère femme">
+                        </div>
+                        <div class="product-content">
+                            <h3 class="product-title">Robe légère femme</h3>
+                            <div class="product-price">
+                                <span class="product-current-price">18 000 FCFA</span>
+                            </div>
+                            <p class="product-description">Robe légère et confortable pour femme.</p>
+                            <button class="btn-add-to-cart-product" data-product-id="102">
+                                <i class="fas fa-cart-plus"></i> Ajouter au panier
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section Maison & Déco -->
+        <section class="rayon-section" id="maison">
+            <div class="container">
+                <div class="rayon-header">
+                    <h2 class="rayon-title">
+                        <i class="fas fa-couch"></i> Rayon Maison & Déco
+                    </h2>
+                    <a href="#" class="voir-plus-btn">
+                        Voir plus <i class="fas fa-arrow-right"></i>
+                    </a>
+                </div>
+                
+                <div class="rayon-products-grid">
+                    <div class="product-card">
+                        <div class="product-image">
+                            <img src="https://i.ibb.co/zWDzMMJP/cousin.webp" alt="Coussin décoratif">
+                        </div>
+                        <div class="product-content">
+                            <h3 class="product-title">Coussin décoratif</h3>
+                            <div class="product-price">
+                                <span class="product-current-price">5 000 FCFA</span>
+                            </div>
+                            <p class="product-description">Coussin pour salon.</p>
+                            <button class="btn-add-to-cart-product" data-product-id="113">
+                                <i class="fas fa-cart-plus"></i> Ajouter au panier
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section Bébé & Enfants -->
+        <section class="rayon-section" id="bebe">
+            <div class="container">
+                <div class="rayon-header">
+                    <h2 class="rayon-title">
+                        <i class="fas fa-baby"></i> Rayon Bébé & Enfants
+                    </h2>
+                    <a href="#" class="voir-plus-btn">
+                        Voir plus <i class="fas fa-arrow-right"></i>
+                    </a>
+                </div>
+                
+                <div class="rayon-products-grid">
+                    <div class="product-card">
+                        <div class="product-image">
+                            <img src="https://i.ibb.co/Hf6fqx5m/voiture.jpg" alt="Voiture miniature jouet">
+                        </div>
+                        <div class="product-content">
+                            <h3 class="product-title">Voiture miniature jouet</h3>
+                            <div class="product-price">
+                                <span class="product-current-price">5 000 FCFA</span>
+                            </div>
+                            <p class="product-description">Petite voiture pour enfants.</p>
+                            <button class="btn-add-to-cart-product" data-product-id="114">
+                                <i class="fas fa-cart-plus"></i> Ajouter au panier
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="product-card">
+                        <div class="product-image">
+                            <img src="https://i.ibb.co/tT9XTMbx/poup-e.webp" alt="Poupée enfant">
+                        </div>
+                        <div class="product-content">
+                            <h3 class="product-title">Poupée enfant</h3>
+                            <div class="product-price">
+                                <span class="product-current-price">7 000 FCFA</span>
+                            </div>
+                            <p class="product-description">Poupée pour jeux d'enfants.</p>
+                            <button class="btn-add-to-cart-product" data-product-id="116">
+                                <i class="fas fa-cart-plus"></i> Ajouter au panier
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section Jardin & Bricolage -->
+        <section class="rayon-section" id="bricolage">
+            <div class="container">
+                <div class="rayon-header">
+                    <h2 class="rayon-title">
+                        <i class="fas fa-tools"></i> Rayon Jardin & Bricolage
+                    </h2>
+                    <a href="#" class="voir-plus-btn">
+                        Voir plus <i class="fas fa-arrow-right"></i>
+                    </a>
+                </div>
+                
+                <div class="rayon-products-grid">
+                    <div class="product-card">
+                        <div class="product-image">
+                            <img src="https://i.ibb.co/hxWytTXp/outils-de-bricolage-ensemble-avec-differents-types-de-cles-marteau-et-d-une-pince-ma60br.jpg" alt="Marteau de bricolage">
+                        </div>
+                        <div class="product-content">
+                            <h3 class="product-title">Marteau de bricolage</h3>
+                            <div class="product-price">
+                                <span class="product-current-price">3 000 FCFA</span>
+                            </div>
+                            <p class="product-description">Marteau pour petits travaux.</p>
+                            <button class="btn-add-to-cart-product" data-product-id="115">
+                                <i class="fas fa-cart-plus"></i> Ajouter au panier
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section Livraison -->
+        <section class="rayon-section" id="delivery">
+            <div class="container">
+                <div class="rayon-header">
+                    <h2 class="rayon-title">
+                        <i class="fas fa-truck"></i> Livraison & Services
+                    </h2>
+                </div>
+                
+                <div class="rayon-products-grid">
+                    <div class="product-card" style="text-align: center; padding: 40px 20px;">
+                        <div class="product-image" style="height: 150px; background: var(--light);">
+                            <i class="fas fa-shipping-fast" style="font-size: 80px; color: var(--primary);"></i>
+                        </div>
+                        <div class="product-content">
+                            <h3 class="product-title">Livraison Rapide</h3>
+                            <p class="product-description">Livraison à domicile rapide dans Ouagadougou</p>
+                            <div class="product-price">
+                                <span class="product-current-price">Prix selon la distance</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="product-card" style="text-align: center; padding: 40px 20px;">
+                        <div class="product-image" style="height: 150px; background: var(--light);">
+                            <i class="fas fa-money-bill-wave" style="font-size: 80px; color: var(--primary);"></i>
+                        </div>
+                        <div class="product-content">
+                            <h3 class="product-title">Paiement à la Livraison</h3>
+                            <p class="product-description">Payez cash à la réception de votre commande</p>
+                            <div class="product-price">
+                                <span class="product-current-price">Espèces ou Mobile Money</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="product-card" style="text-align: center; padding: 40px 20px;">
+                        <div class="product-image" style="height: 150px; background: var(--light);">
+                            <i class="fas fa-gift" style="font-size: 80px; color: var(--primary);"></i>
+                        </div>
+                        <div class="product-content">
+                            <h3 class="product-title">Prix de Livraison</h3>
+                            <p class="product-description">Le prix est fixé par le livreur selon votre distance</p>
+                            <div class="product-price">
+                                <span class="product-current-price">Contactez-nous</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer>
+            <div class="container">
+                <div class="footer-content">
+                    <div class="footer-logo-section">
+                        <div class="footer-logo">
+                            <img src="https://i.ibb.co/b5BXdfBG/logo-unimall.png" alt="UNIMALL Logo" class="footer-logo-img">
+                            <div class="footer-logo-text">UNI<span>MALL</span></div>
+                        </div>
+                        <p>Votre supermarché de quartier en ligne ! Épicerie fraîche, produits ménagers, électroménager, chaussures, vêtements et bien plus. Tout pour votre quotidien à prix supermarché.</p>
+                        <div class="social-links">
+                            <a href="#" class="social-link"><i class="fab fa-facebook-f"></i></a>
+                            <a href="#" class="social-link"><i class="fab fa-instagram"></i></a>
+                            <a href="#" class="social-link"><i class="fab fa-whatsapp"></i></a>
+                        </div>
+                    </div>
+                    
+                    
+                    <div>
+                        <h3 class="footer-title">Contact & Informations</h3>
+                        <ul class="footer-links">
+                            <li><i class="fas fa-map-marker-alt"></i> ZAD, Avenue Tensoba, Ouagadougou</li>
+                            <li><i class="fas fa-phone"></i> 57 36 66 66</li>
+                            <li><i class="fas fa-envelope"></i> <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="94f7fbfae0f5f7e0d4e1fafdf9f5f8f8baf6f2">[email&#160;protected]</a></li>
+                            <li><i class="fas fa-clock"></i> Lun-Sam: 7h-20h, Dim: 8h-18h</li>
+                            <li><i class="fas fa-truck"></i> Livraison</li>
+                        </ul>
+                    </div>
+                </div>
+                
+               
+                
+                <div class="copyright">
+                    <p>© 2023 UNIMALL - Supermarché en ligne à Ouagadougou. Tous droits réservés.</p>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Scroll to top button -->
+    <button id="scrollToTop" aria-label="Retour en haut">
+        <i class="fas fa-chevron-up"></i>
+    </button>
+
+    <script src="script.js"></script>
+</body>
+</html>

@@ -1,0 +1,1353 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UNIMALL Livreur — Interface livraison</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* ============ STYLES COMPLETS (identiques) ============ */
+        :root {
+            --primary: #E65100;
+            --primary-dark: #BF360C;
+            --primary-light: #FF8A65;
+            --secondary: #2E7D32;
+            --success: #388E3C;
+            --success-soft: #E8F5E9;
+            --warning: #F57C00;
+            --warning-soft: #FFF3E0;
+            --danger: #D32F2F;
+            --danger-soft: #FFEBEE;
+            --info: #1565C0;
+            --info-soft: #E3F2FD;
+            --dark: #1E293B;
+            --ink-2: #334155;
+            --ink-3: #64748B;
+            --ink-4: #94A3B8;
+            --surface: #F8FAFC;
+            --line: #E2E8F0;
+            --white: #FFFFFF;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: var(--surface);
+            color: var(--dark);
+            min-height: 100vh;
+        }
+
+        /* ============ EN-TÊTE ============ */
+        .header {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            padding: 0 25px;
+            height: 64px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .logo { display: flex; align-items: center; gap: 12px; }
+        .logo-icon {
+            width: 38px; height: 38px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 18px;
+        }
+        .logo h1 { font-size: 18px; font-weight: 800; }
+        .logo span { font-size: 11px; opacity: 0.75; display: block; margin-top: 1px; }
+
+        .header-right { display: flex; align-items: center; gap: 12px; }
+
+        .livreur-name-header {
+            font-weight: 700;
+            font-size: 14px;
+        }
+
+        .status-toggle {
+            display: flex; align-items: center; gap: 8px;
+            background: rgba(255,255,255,0.15);
+            padding: 6px 14px; border-radius: 30px;
+            cursor: pointer; border: none; color: white;
+            font-size: 13px; font-weight: 600;
+            transition: background 0.2s;
+        }
+        .status-toggle:hover { background: rgba(255,255,255,0.25); }
+
+        .status-dot {
+            width: 9px; height: 9px; border-radius: 50%;
+            background: #4CAF50;
+            box-shadow: 0 0 0 2px rgba(76,175,80,0.4);
+            animation: pulse 2s infinite;
+        }
+        .status-dot.offline { background: #9e9e9e; animation: none; box-shadow: none; }
+
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(76,175,80,0.7); }
+            70% { box-shadow: 0 0 0 8px rgba(76,175,80,0); }
+            100% { box-shadow: 0 0 0 0 rgba(76,175,80,0); }
+        }
+
+        .notif-btn {
+            position: relative; cursor: pointer;
+            background: rgba(255,255,255,0.15);
+            width: 38px; height: 38px; border-radius: 10px;
+            border: none; color: white; font-size: 16px;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .notif-btn:hover { background: rgba(255,255,255,0.25); }
+
+        .notif-badge {
+            position: absolute; top: -5px; right: -5px;
+            background: var(--danger); color: white;
+            font-size: 10px; font-weight: 700;
+            width: 18px; height: 18px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .notif-badge.hidden { display: none; }
+
+        /* ============ KPI STATS ============ */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            max-width: 900px;
+            margin: 20px auto;
+            padding: 0 20px;
+        }
+
+        .stat-card {
+            background: var(--white);
+            padding: 18px 20px;
+            border-radius: 14px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+            display: flex; align-items: center; gap: 14px;
+            border-left: 4px solid var(--primary);
+        }
+
+        .stat-icon {
+            font-size: 26px; color: var(--primary);
+            background: #FFF3E0; width: 46px; height: 46px;
+            border-radius: 12px; display: flex; align-items: center; justify-content: center;
+        }
+
+        .stat-info h3 { font-size: 22px; font-weight: 800; color: var(--dark); }
+        .stat-info p { color: var(--ink-3); font-size: 12px; margin-top: 2px; }
+
+        /* ============ TABS ============ */
+        .tabs-container {
+            max-width: 900px; margin: 0 auto 0;
+            padding: 0 20px;
+        }
+
+        .tabs {
+            display: flex; gap: 4px;
+            background: var(--white);
+            padding: 6px; border-radius: 14px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        }
+
+        .tab-btn {
+            flex: 1; padding: 10px 8px;
+            border: none; background: transparent;
+            border-radius: 10px; cursor: pointer;
+            font-size: 13px; font-weight: 600;
+            color: var(--ink-3); transition: all 0.2s;
+            display: flex; align-items: center; justify-content: center; gap: 6px;
+        }
+
+        .tab-btn.active {
+            background: var(--primary);
+            color: white;
+            box-shadow: 0 2px 8px rgba(230,81,0,0.3);
+        }
+
+        .tab-count {
+            background: rgba(255,255,255,0.25); color: white;
+            font-size: 11px; font-weight: 700;
+            padding: 1px 6px; border-radius: 10px;
+            min-width: 20px; text-align: center;
+        }
+
+        .tab-btn:not(.active) .tab-count {
+            background: var(--primary);
+            color: white;
+        }
+
+        /* ============ CONTENU PRINCIPAL ============ */
+        .main-container {
+            max-width: 900px; margin: 16px auto;
+            padding: 0 20px 80px;
+        }
+
+        .tab-content { display: none; }
+        .tab-content.active { display: block; animation: fadeIn 0.3s ease; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* ============ CARTES COMMANDES ============ */
+        .order-card {
+            background: var(--white);
+            border: 2px solid var(--line);
+            border-radius: 16px; padding: 20px;
+            margin-bottom: 16px;
+            transition: all 0.25s;
+            position: relative; overflow: hidden;
+        }
+
+        .order-card::before {
+            content: '';
+            position: absolute; left: 0; top: 0; bottom: 0;
+            width: 4px;
+            background: var(--primary);
+        }
+
+        .order-card.rdv::before { background: var(--info); }
+        .order-card.in-progress::before { background: var(--warning); }
+        .order-card.completed::before { background: var(--success); }
+
+        .order-card:hover { border-color: var(--primary); box-shadow: 0 8px 24px rgba(0,0,0,0.1); }
+
+        .order-header {
+            display: flex; justify-content: space-between;
+            align-items: center; margin-bottom: 14px;
+            padding-bottom: 12px; border-bottom: 1px dashed var(--line);
+        }
+
+        .order-id { font-size: 17px; font-weight: 800; color: var(--primary); }
+
+        .status-badge {
+            padding: 5px 14px; border-radius: 30px;
+            font-size: 12px; font-weight: 700;
+        }
+        .badge-new { background: #FFF3E0; color: var(--primary); }
+        .badge-rdv { background: var(--info-soft); color: var(--info); }
+        .badge-progress { background: var(--warning-soft); color: var(--warning); }
+        .badge-completed { background: var(--success-soft); color: var(--success); }
+
+        .info-grid {
+            display: grid; grid-template-columns: 1fr 1fr;
+            gap: 10px; margin-bottom: 14px;
+        }
+
+        .info-item {}
+        .info-label { font-size: 11px; font-weight: 700; color: var(--ink-4); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 3px; }
+        .info-value { font-size: 14px; font-weight: 600; color: var(--dark); display: flex; align-items: center; gap: 6px; }
+        .info-value i { color: var(--primary); font-size: 12px; }
+
+        .products-list {
+            background: var(--surface); border-radius: 10px;
+            padding: 12px 14px; margin-bottom: 14px;
+            font-size: 13px; color: var(--ink-2);
+        }
+        .products-list-title { font-weight: 700; font-size: 12px; color: var(--ink-4); text-transform: uppercase; margin-bottom: 8px; }
+        .product-item { display: flex; justify-content: space-between; padding: 3px 0; border-bottom: 1px solid var(--line); }
+        .product-item:last-child { border-bottom: none; }
+        .product-total { display: flex; justify-content: space-between; margin-top: 8px; font-weight: 700; font-size: 14px; color: var(--dark); padding-top: 6px; border-top: 2px solid var(--line); }
+
+        /* ============ TIMELINE ÉTAPES ============ */
+        .timeline {
+            display: flex; gap: 0;
+            margin-bottom: 16px;
+            overflow-x: auto;
+        }
+
+        .timeline-step {
+            flex: 1; text-align: center;
+            position: relative; min-width: 80px;
+        }
+
+        .timeline-step::after {
+            content: '';
+            position: absolute; top: 13px; left: 50%;
+            width: 100%; height: 2px;
+            background: var(--line); z-index: 0;
+        }
+
+        .timeline-step:last-child::after { display: none; }
+
+        .step-circle {
+            width: 28px; height: 28px; border-radius: 50%;
+            background: var(--line); color: var(--ink-4);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 12px; font-weight: 700;
+            margin: 0 auto 6px; position: relative; z-index: 1;
+            border: 2px solid var(--line);
+        }
+
+        .step-circle.done { background: var(--success); color: white; border-color: var(--success); }
+        .step-circle.current { background: var(--primary); color: white; border-color: var(--primary); animation: pulseBorder 1.5s infinite; }
+
+        @keyframes pulseBorder {
+            0% { box-shadow: 0 0 0 0 rgba(230,81,0,0.4); }
+            70% { box-shadow: 0 0 0 6px rgba(230,81,0,0); }
+            100% { box-shadow: 0 0 0 0 rgba(230,81,0,0); }
+        }
+
+        .step-label { font-size: 10px; color: var(--ink-4); font-weight: 600; line-height: 1.2; }
+        .step-label.done { color: var(--success); }
+        .step-label.current { color: var(--primary); font-weight: 700; }
+
+        /* ============ BOUTONS ============ */
+        .action-btns {
+            display: flex; gap: 10px; flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 10px 18px; border: none; border-radius: 10px;
+            font-size: 13px; font-weight: 700; cursor: pointer;
+            display: flex; align-items: center; gap: 8px;
+            transition: all 0.2s; text-decoration: none;
+        }
+
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-primary:hover { background: var(--primary-dark); transform: translateY(-1px); box-shadow: 0 4px 12px rgba(230,81,0,0.3); }
+
+        .btn-success { background: var(--success); color: white; }
+        .btn-success:hover { background: #2E7D32; transform: translateY(-1px); }
+
+        .btn-info { background: var(--info); color: white; }
+        .btn-info:hover { background: #0D47A1; }
+
+        .btn-outline {
+            background: transparent; color: var(--ink-2);
+            border: 2px solid var(--line);
+        }
+        .btn-outline:hover { border-color: var(--primary); color: var(--primary); }
+
+        .btn-maps { background: #1A73E8; color: white; }
+        .btn-maps:hover { background: #1557B0; }
+
+        .btn-call { background: #4CAF50; color: white; }
+        .btn-call:hover { background: #388E3C; }
+
+        .btn-danger { background: var(--danger); color: white; }
+        .btn-warning { background: var(--warning); color: white; }
+
+        /* ============ INSTRUCTIONS ADMIN ============ */
+        .admin-instruction {
+            background: var(--info-soft); border: 1px solid #90CAF9;
+            border-radius: 10px; padding: 12px 14px; margin-bottom: 14px;
+            display: flex; gap: 10px; align-items: flex-start;
+        }
+        .admin-instruction i { color: var(--info); margin-top: 2px; flex-shrink: 0; }
+        .admin-instruction p { font-size: 13px; color: var(--info); font-weight: 600; }
+
+        /* ============ EMPTY STATE ============ */
+        .empty-state {
+            text-align: center; padding: 50px 20px;
+            color: var(--ink-4);
+        }
+        .empty-state i { font-size: 48px; margin-bottom: 14px; display: block; opacity: 0.4; }
+        .empty-state h3 { font-size: 16px; color: var(--ink-3); margin-bottom: 6px; }
+        .empty-state p { font-size: 13px; }
+
+        /* ============ MODALS ============ */
+        .modal-overlay {
+            position: fixed; inset: 0;
+            background: rgba(0,0,0,0.5); backdrop-filter: blur(3px);
+            z-index: 1000; display: none; align-items: center; justify-content: center;
+            padding: 20px;
+        }
+        .modal-overlay.active { display: flex; }
+
+        .modal-box {
+            background: white; border-radius: 20px;
+            padding: 28px; max-width: 480px; width: 100%;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+            animation: modalIn 0.3s ease;
+        }
+
+        @keyframes modalIn { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
+
+        .modal-title {
+            font-size: 18px; font-weight: 800; color: var(--dark);
+            display: flex; align-items: center; gap: 10px; margin-bottom: 20px;
+        }
+        .modal-title i { color: var(--primary); }
+
+        .form-group { margin-bottom: 16px; }
+        .form-group label { display: block; font-size: 13px; font-weight: 700; color: var(--ink-2); margin-bottom: 6px; }
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%; padding: 10px 14px;
+            border: 2px solid var(--line); border-radius: 10px;
+            font-size: 14px; font-family: inherit;
+            transition: border-color 0.2s;
+        }
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+            outline: none; border-color: var(--primary);
+        }
+
+        .modal-footer {
+            display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px;
+        }
+
+        /* ============ ALERT BOX ============ */
+        .alert-box {
+            border-radius: 12px; padding: 14px 16px;
+            display: flex; gap: 12px; align-items: flex-start;
+            margin-bottom: 16px;
+        }
+        .alert-box.success { background: var(--success-soft); border: 1px solid #A5D6A7; color: var(--success); }
+        .alert-box.warning { background: var(--warning-soft); border: 1px solid #FFB74D; color: var(--warning); }
+        .alert-box.danger { background: var(--danger-soft); border: 1px solid #EF9A9A; color: var(--danger); }
+        .alert-box.info { background: var(--info-soft); border: 1px solid #90CAF9; color: var(--info); }
+
+        /* ============ NOTIFICATIONS PANEL ============ */
+        .notif-panel {
+            position: fixed; top: 64px; right: 16px;
+            width: 340px; background: white;
+            border-radius: 16px; box-shadow: 0 8px 32px rgba(0,0,0,0.15);
+            z-index: 200; display: none; overflow: hidden;
+            border: 1px solid var(--line);
+        }
+        .notif-panel.show { display: block; animation: slideDown 0.2s ease; }
+        @keyframes slideDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+
+        .notif-panel-header {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white; padding: 14px 18px;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .notif-panel-header h3 { font-size: 15px; font-weight: 700; }
+
+        .notif-item {
+            padding: 14px 18px; border-bottom: 1px solid var(--surface);
+            cursor: pointer; transition: background 0.15s;
+        }
+        .notif-item:hover { background: var(--surface); }
+        .notif-item.unread { background: #FFF8F5; border-left: 3px solid var(--primary); }
+        .notif-item .notif-msg { font-size: 13px; font-weight: 600; color: var(--dark); margin-bottom: 4px; }
+        .notif-item .notif-time { font-size: 11px; color: var(--ink-4); }
+
+        /* ============ TOAST NOTIFICATIONS ============ */
+        .toast-wrap {
+            position: fixed; bottom: 24px; left: 50%;
+            transform: translateX(-50%); z-index: 2000;
+            display: flex; flex-direction: column; align-items: center; gap: 8px;
+        }
+
+        .toast {
+            padding: 12px 24px; border-radius: 12px;
+            color: white; font-size: 14px; font-weight: 600;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+            animation: toastIn 0.3s ease;
+            display: flex; align-items: center; gap: 10px;
+            max-width: 360px;
+        }
+
+        .toast.success { background: var(--success); }
+        .toast.error { background: var(--danger); }
+        .toast.info { background: var(--info); }
+        .toast.warning { background: var(--warning); }
+
+        @keyframes toastIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* ============ BADGE FRAIS ============ */
+        .frais-badge {
+            background: linear-gradient(135deg, var(--success), #2E7D32);
+            color: white; border-radius: 10px; padding: 12px 16px;
+            display: flex; align-items: center; gap: 12px; margin-bottom: 14px;
+        }
+        .frais-badge i { font-size: 24px; }
+        .frais-badge div { flex: 1; }
+        .frais-badge strong { font-size: 20px; display: block; }
+        .frais-badge span { font-size: 12px; opacity: 0.85; }
+
+        /* ============ RESPONSIVE ============ */
+        @media (max-width: 600px) {
+            .stats-grid { grid-template-columns: 1fr; }
+            .info-grid { grid-template-columns: 1fr; }
+            .tab-btn span { display: none; }
+            .action-btns { flex-direction: column; }
+            .btn { justify-content: center; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- EN-TÊTE -->
+<header class="header">
+    <div class="logo">
+        <div class="logo-icon"><i class="fas fa-motorcycle"></i></div>
+        <div>
+            <h1>UNIMALL Livreur</h1>
+            <span id="livreurNameHeader">Ali Kaboré</span>
+        </div>
+    </div>
+    <div class="header-right">
+        <button class="status-toggle" onclick="toggleStatus()" id="statusToggle">
+            <div class="status-dot" id="statusDot"></div>
+            <span id="statusText">En ligne</span>
+        </button>
+        <button class="notif-btn" onclick="toggleNotifPanel()">
+            <i class="fas fa-bell"></i>
+            <span class="notif-badge hidden" id="notifCount">0</span>
+        </button>
+    </div>
+</header>
+
+<!-- STATISTIQUES -->
+<div class="stats-grid">
+    <div class="stat-card">
+        <div class="stat-icon"><i class="fas fa-money-bill-wave"></i></div>
+        <div class="stat-info">
+            <h3 id="todayEarnings">0</h3>
+            <p>FCFA gagnés aujourd'hui</p>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon"><i class="fas fa-check-circle"></i></div>
+        <div class="stat-info">
+            <h3 id="todayDeliveries">0</h3>
+            <p>Livraisons effectuées</p>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon"><i class="fas fa-star"></i></div>
+        <div class="stat-info">
+            <h3 id="rating">4.8 ⭐</h3>
+            <p>Note moyenne</p>
+        </div>
+    </div>
+</div>
+
+<!-- ONGLETS -->
+<div class="tabs-container">
+    <div class="tabs">
+        <button class="tab-btn active" onclick="switchTab('nouvelles')">
+            <i class="fas fa-bell"></i>
+            <span>Nouvelles</span>
+            <span class="tab-count" id="tab-count-nouvelles">0</span>
+        </button>
+        <button class="tab-btn" onclick="switchTab('rdv')">
+            <i class="fas fa-calendar-check"></i>
+            <span>RDV</span>
+            <span class="tab-count" id="tab-count-rdv">0</span>
+        </button>
+        <button class="tab-btn" onclick="switchTab('encours')">
+            <i class="fas fa-truck"></i>
+            <span>En cours</span>
+            <span class="tab-count" id="tab-count-encours">0</span>
+        </button>
+        <button class="tab-btn" onclick="switchTab('historique')">
+            <i class="fas fa-history"></i>
+            <span>Historique</span>
+            <span class="tab-count" id="tab-count-historique">0</span>
+        </button>
+    </div>
+</div>
+
+<!-- CONTENU PRINCIPAL -->
+<div class="main-container">
+
+    <!-- Nouvelles missions -->
+    <div class="tab-content active" id="tab-nouvelles">
+        <div id="nouvellesOrdersList"></div>
+    </div>
+
+    <!-- RDV confirmés -->
+    <div class="tab-content" id="tab-rdv">
+        <div id="rdvOrdersList"></div>
+    </div>
+
+    <!-- En cours -->
+    <div class="tab-content" id="tab-encours">
+        <div id="encoursOrdersList"></div>
+    </div>
+
+    <!-- Historique -->
+    <div class="tab-content" id="tab-historique">
+        <div id="historiqueList"></div>
+    </div>
+
+</div>
+
+<!-- PANEL NOTIFICATIONS -->
+<div class="notif-panel" id="notifPanel">
+    <div class="notif-panel-header">
+        <h3><i class="fas fa-bell"></i> Notifications</h3>
+        <button onclick="marquerToutLu()" style="background:rgba(255,255,255,0.2);border:none;color:white;padding:4px 10px;border-radius:8px;cursor:pointer;font-size:12px;">Tout lu</button>
+    </div>
+    <div id="notifsList" style="max-height:400px;overflow-y:auto;"></div>
+</div>
+
+<!-- MODAL RDV -->
+<div class="modal-overlay" id="modalRdv">
+    <div class="modal-box">
+        <div class="modal-title"><i class="fas fa-calendar-alt"></i> Fixer un rendez-vous</div>
+        <div id="rdvModalContent"></div>
+        <div class="modal-footer">
+            <button class="btn btn-outline" onclick="closeModal('modalRdv')">Annuler</button>
+            <button class="btn btn-primary" onclick="confirmerRdv()"><i class="fas fa-check"></i> Confirmer le RDV</button>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL RÉCUPÉRATION COLIS -->
+<div class="modal-overlay" id="modalColis">
+    <div class="modal-box">
+        <div class="modal-title"><i class="fas fa-box-open"></i> Récupération du colis</div>
+        <div id="colisModalContent"></div>
+        <div class="modal-footer">
+            <button class="btn btn-outline" onclick="closeModal('modalColis')">Annuler</button>
+            <button class="btn btn-success" onclick="confirmerRecuperation()"><i class="fas fa-check-circle"></i> Colis récupéré, je pars livrer</button>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL VÉRIFICATION PAIEMENT -->
+<div class="modal-overlay" id="modalPaiement">
+    <div class="modal-box">
+        <div class="modal-title"><i class="fas fa-shield-alt"></i> Vérification du dépôt</div>
+        <div id="paiementModalContent"></div>
+        <div class="modal-footer">
+            <button class="btn btn-outline" onclick="closeModal('modalPaiement')">Retour</button>
+            <button class="btn btn-success" id="btnConfirmPaiement" onclick="confirmerPaiementFinal()"><i class="fas fa-check-circle"></i> Dépôt confirmé — Encaisser mes frais</button>
+        </div>
+    </div>
+</div>
+
+<!-- TOAST WRAPPER -->
+<div class="toast-wrap" id="toastWrap"></div>
+
+<script>
+// ============================================
+// DONNÉES DU LIVREUR CONNECTÉ
+// ============================================
+const currentLivreur = {
+    id: 'LIV-01',
+    nom: 'Moussa Kaboré',
+    telephone: '70 11 22 33',
+    gainsJour: 0,
+    livraisonsJour: 0,
+    enLigne: true
+};
+
+let activeOrderId = null;
+
+// ============================================
+// SYNCHRONISATION LOCALSTORAGE
+// ============================================
+function getSharedOrders() {
+    try {
+        const stored = localStorage.getItem('unimall_orders');
+        return stored ? JSON.parse(stored) : [];
+    } catch { return []; }
+}
+
+function setSharedOrders(ordersArr) {
+    try {
+        localStorage.setItem('unimall_orders', JSON.stringify(ordersArr));
+    } catch {}
+}
+
+function getSharedNotifs() {
+    try {
+        const stored = localStorage.getItem('unimall_notifs_livreur');
+        return stored ? JSON.parse(stored) : [];
+    } catch { return []; }
+}
+
+function setSharedNotifs(notifs) {
+    try {
+        localStorage.setItem('unimall_notifs_livreur', JSON.stringify(notifs));
+    } catch {}
+}
+
+function getMesCommandes() {
+    const all = getSharedOrders();
+    return all.filter(o => o.livreurId === currentLivreur.id || o.assignedTo === currentLivreur.id);
+}
+
+function updateOrderInStorage(orderId, updates) {
+    const all = getSharedOrders();
+    const idx = all.findIndex(o => o.id === orderId);
+    if (idx !== -1) {
+        all[idx] = { ...all[idx], ...updates };
+        setSharedOrders(all);
+    }
+}
+
+// ============================================
+// UTILITAIRES
+// ============================================
+function formatPrice(price) {
+    return parseInt(price).toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ");
+}
+
+function showToast(msg, type = 'success') {
+    const icons = { success: 'check-circle', error: 'times-circle', info: 'info-circle', warning: 'exclamation-triangle' };
+    const toast = document.createElement('div');
+    toast.className = `toast ${type}`;
+    toast.innerHTML = `<i class="fas fa-${icons[type] || 'info-circle'}"></i> ${msg}`;
+    document.getElementById('toastWrap').appendChild(toast);
+    setTimeout(() => {
+        toast.style.opacity = '0';
+        toast.style.transition = 'opacity 0.3s';
+        setTimeout(() => toast.remove(), 300);
+    }, 3500);
+}
+
+// ============================================
+// STATUT EN LIGNE / OFFLINE
+// ============================================
+function toggleStatus() {
+    currentLivreur.enLigne = !currentLivreur.enLigne;
+    document.getElementById('statusDot').classList.toggle('offline', !currentLivreur.enLigne);
+    document.getElementById('statusText').textContent = currentLivreur.enLigne ? 'En ligne' : 'Hors ligne';
+    showToast(currentLivreur.enLigne ? '✅ Vous êtes en ligne' : '⏸️ Vous êtes hors ligne', currentLivreur.enLigne ? 'success' : 'info');
+}
+
+// ============================================
+// ONGLETS
+// ============================================
+function switchTab(tabName) {
+    document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('tab-' + tabName).classList.add('active');
+    event.currentTarget.classList.add('active');
+}
+
+// ============================================
+// CHARGEMENT DES COMMANDES
+// ============================================
+function loadAll() {
+    const mesCommandes = getMesCommandes();
+
+    const nouvelles = mesCommandes.filter(o => o.status === 'assigned');
+    const rdvList = mesCommandes.filter(o => o.status === 'rdv_fixed');
+    const encours = mesCommandes.filter(o => o.status === 'in_progress');
+    const historique = mesCommandes.filter(o => o.status === 'completed' || o.status === 'livree');
+
+    document.getElementById('tab-count-nouvelles').textContent = nouvelles.length;
+    document.getElementById('tab-count-rdv').textContent = rdvList.length;
+    document.getElementById('tab-count-encours').textContent = encours.length;
+    document.getElementById('tab-count-historique').textContent = historique.length;
+
+    renderNouvelles(nouvelles);
+    renderRdv(rdvList);
+    renderEncours(encours);
+    renderHistorique(historique);
+
+    loadNotifPanel();
+    
+    document.getElementById('todayEarnings').textContent = formatPrice(currentLivreur.gainsJour);
+    document.getElementById('todayDeliveries').textContent = currentLivreur.livraisonsJour;
+}
+
+// ============================================
+// FONCTION POUR OUVRIR LA LOCALISATION (AJOUTÉE)
+// ============================================
+function openMaps(adresse) {
+    if (!adresse || adresse === 'À préciser' || adresse === '—') {
+        showToast('Adresse non disponible', 'warning');
+        return;
+    }
+    // Ouvre Google Maps avec l'adresse
+    window.open(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(adresse)}`, '_blank');
+}
+
+// ============================================
+// RENDER — NOUVELLES MISSIONS
+// ============================================
+function renderNouvelles(orders) {
+    const container = document.getElementById('nouvellesOrdersList');
+    if (orders.length === 0) {
+        container.innerHTML = `<div class="empty-state">
+            <i class="fas fa-inbox"></i>
+            <h3>Aucune nouvelle mission</h3>
+            <p>Vous serez notifié dès qu'UNIMALL vous assigne une livraison</p>
+        </div>`;
+        return;
+    }
+
+    container.innerHTML = orders.map(o => `
+        <div class="order-card" id="card-${o.id}">
+            <div class="order-header">
+                <span class="order-id"><i class="fas fa-hashtag"></i> ${o.id}</span>
+                <span class="status-badge badge-new">🔔 Nouvelle mission</span>
+            </div>
+
+            ${o.instructions ? `<div class="admin-instruction"><i class="fas fa-comment-alt"></i><p>Note UNIMALL : ${o.instructions}</p></div>` : ''}
+
+            <div class="info-grid">
+                <div class="info-item">
+                    <div class="info-label">Client</div>
+                    <div class="info-value"><i class="fas fa-user"></i> ${o.client}</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Téléphone</div>
+                    <div class="info-value"><i class="fas fa-phone"></i> ${o.telephone || 'Non fourni'}</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Adresse</div>
+                    <div class="info-value"><i class="fas fa-map-marker-alt"></i> ${o.adresse || 'À préciser'}</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Montant commande</div>
+                    <div class="info-value"><i class="fas fa-tag"></i> ${formatPrice(o.amount)} FCFA</div>
+                </div>
+            </div>
+
+            <div class="alert-box info">
+                <i class="fas fa-info-circle"></i>
+                <div>
+                    <strong>Étape 1 : Contacter le client</strong>
+                    <p style="font-size:12px;margin-top:3px;">Appelez le client pour fixer l'heure de livraison.</p>
+                </div>
+            </div>
+
+            <div class="action-btns">
+                <a href="tel:${(o.telephone || '').replace(/\s/g,'')}" class="btn btn-call"><i class="fas fa-phone"></i> Appeler</a>
+                <button class="btn btn-maps" onclick="openMaps('${o.adresse || ''}')"><i class="fas fa-map-marked-alt"></i> Itinéraire</button>
+                <button class="btn btn-primary" onclick="openRdvModal('${o.id}')"><i class="fas fa-calendar-alt"></i> Fixer le RDV</button>
+            </div>
+        </div>
+    `).join('');
+}
+
+// ============================================
+// RENDER — RDV FIXÉS
+// ============================================
+function renderRdv(orders) {
+    const container = document.getElementById('rdvOrdersList');
+    if (orders.length === 0) {
+        container.innerHTML = `<div class="empty-state">
+            <i class="fas fa-calendar-times"></i>
+            <h3>Aucun RDV en attente</h3>
+            <p>Les RDV confirmés apparaîtront ici</p>
+        </div>`;
+        return;
+    }
+
+    container.innerHTML = orders.map(o => `
+        <div class="order-card rdv" id="card-${o.id}">
+            <div class="order-header">
+                <span class="order-id"><i class="fas fa-hashtag"></i> ${o.id}</span>
+                <span class="status-badge badge-rdv">📅 RDV fixé — ${o.rdvHeure || ''}</span>
+            </div>
+
+            <div class="info-grid">
+                <div class="info-item">
+                    <div class="info-label">Client</div>
+                    <div class="info-value"><i class="fas fa-user"></i> ${o.client}</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">RDV prévu</div>
+                    <div class="info-value"><i class="fas fa-clock"></i> <strong style="color:var(--info)">${o.rdvHeure || 'À définir'}</strong></div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Adresse</div>
+                    <div class="info-value"><i class="fas fa-map-marker-alt"></i> ${o.adresse || '—'}</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Téléphone</div>
+                    <div class="info-value"><i class="fas fa-phone"></i> ${o.telephone || '—'}</div>
+                </div>
+            </div>
+
+            <!-- TIMELINE -->
+            <div class="timeline">
+                <div class="timeline-step">
+                    <div class="step-circle done"><i class="fas fa-check"></i></div>
+                    <div class="step-label done">Mission reçue</div>
+                </div>
+                <div class="timeline-step">
+                    <div class="step-circle done"><i class="fas fa-check"></i></div>
+                    <div class="step-label done">RDV fixé</div>
+                </div>
+                <div class="timeline-step">
+                    <div class="step-circle current">3</div>
+                    <div class="step-label current">Récupérer colis</div>
+                </div>
+                <div class="timeline-step">
+                    <div class="step-circle">4</div>
+                    <div class="step-label">Livrer</div>
+                </div>
+                <div class="timeline-step">
+                    <div class="step-circle">5</div>
+                    <div class="step-label">Vérifier dépôt</div>
+                </div>
+            </div>
+
+            <div class="alert-box warning">
+                <i class="fas fa-box-open"></i>
+                <div>
+                    <strong>Étape 2 : Récupérer le colis à UNIMALL</strong>
+                    <p style="font-size:12px;margin-top:3px;">Rendez-vous au magasin pour récupérer la commande <strong>${o.id}</strong> au nom de ${o.client}.</p>
+                </div>
+            </div>
+
+            <div class="action-btns">
+                <a href="tel:${(o.telephone || '').replace(/\s/g,'')}" class="btn btn-call"><i class="fas fa-phone"></i> Rappeler</a>
+                <button class="btn btn-maps" onclick="openMaps('${o.adresse || ''}')"><i class="fas fa-map-marked-alt"></i> Itinéraire</button>
+                <button class="btn btn-primary" onclick="openColisModal('${o.id}')"><i class="fas fa-box-open"></i> Colis récupéré à UNIMALL</button>
+            </div>
+        </div>
+    `).join('');
+}
+
+// ============================================
+// RENDER — EN COURS
+// ============================================
+function renderEncours(orders) {
+    const container = document.getElementById('encoursOrdersList');
+    if (orders.length === 0) {
+        container.innerHTML = `<div class="empty-state">
+            <i class="fas fa-truck"></i>
+            <h3>Aucune livraison en cours</h3>
+        </div>`;
+        return;
+    }
+
+    container.innerHTML = orders.map(o => `
+        <div class="order-card in-progress" id="card-${o.id}">
+            <div class="order-header">
+                <span class="order-id"><i class="fas fa-hashtag"></i> ${o.id}</span>
+                <span class="status-badge badge-progress">🚴 En route</span>
+            </div>
+
+            <div class="info-grid">
+                <div class="info-item">
+                    <div class="info-label">Client</div>
+                    <div class="info-value"><i class="fas fa-user"></i> ${o.client}</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">RDV</div>
+                    <div class="info-value"><i class="fas fa-clock"></i> ${o.rdvHeure || 'Maintenant'}</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Adresse livraison</div>
+                    <div class="info-value"><i class="fas fa-map-marker-alt"></i> ${o.adresse || '—'}</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Montant à vérifier</div>
+                    <div class="info-value"><i class="fas fa-money-bill-wave"></i> <strong style="color:var(--success)">${formatPrice(o.amount)} FCFA</strong></div>
+                </div>
+            </div>
+
+            <!-- TIMELINE -->
+            <div class="timeline">
+                <div class="timeline-step">
+                    <div class="step-circle done"><i class="fas fa-check"></i></div>
+                    <div class="step-label done">Mission</div>
+                </div>
+                <div class="timeline-step">
+                    <div class="step-circle done"><i class="fas fa-check"></i></div>
+                    <div class="step-label done">RDV fixé</div>
+                </div>
+                <div class="timeline-step">
+                    <div class="step-circle done"><i class="fas fa-check"></i></div>
+                    <div class="step-label done">Colis récupéré</div>
+                </div>
+                <div class="timeline-step">
+                    <div class="step-circle current"><i class="fas fa-truck"></i></div>
+                    <div class="step-label current">En livraison</div>
+                </div>
+                <div class="timeline-step">
+                    <div class="step-circle">5</div>
+                    <div class="step-label">Vérifier dépôt</div>
+                </div>
+            </div>
+
+            ${o.fraisLivraison ? `
+            <div class="frais-badge">
+                <i class="fas fa-money-bill-wave"></i>
+                <div>
+                    <strong>${formatPrice(o.fraisLivraison)} FCFA</strong>
+                    <span>Vos frais de livraison à encaisser</span>
+                </div>
+            </div>` : ''}
+
+            <div class="alert-box info">
+                <i class="fas fa-shield-alt"></i>
+                <div>
+                    <strong>Étape 4 : Vérifier le dépôt d'UNIMALL</strong>
+                    <p style="font-size:12px;margin-top:3px;">Avant de remettre le colis, vérifiez que le client a bien effectué le dépôt de <strong>${formatPrice(o.amount)} FCFA</strong> à UNIMALL (Orange Money / Moov Money / Airtel Money).</p>
+                </div>
+            </div>
+
+            <div class="action-btns">
+                <button class="btn btn-maps" onclick="openMaps('${o.adresse || ''}')"><i class="fas fa-map-marked-alt"></i> Itinéraire</button>
+                <a href="tel:${(o.telephone || '').replace(/\s/g,'')}" class="btn btn-call"><i class="fas fa-phone"></i> Appeler</a>
+                <button class="btn btn-success" onclick="openPaiementModal('${o.id}')"><i class="fas fa-shield-alt"></i> Vérifier le dépôt & Encaisser</button>
+            </div>
+        </div>
+    `).join('');
+}
+
+// ============================================
+// RENDER — HISTORIQUE
+// ============================================
+function renderHistorique(orders) {
+    const container = document.getElementById('historiqueList');
+    if (orders.length === 0) {
+        container.innerHTML = `<div class="empty-state">
+            <i class="fas fa-history"></i>
+            <h3>Aucune livraison terminée</h3>
+        </div>`;
+        return;
+    }
+
+    container.innerHTML = orders.map(o => `
+        <div class="order-card completed">
+            <div class="order-header">
+                <span class="order-id"><i class="fas fa-hashtag"></i> ${o.id}</span>
+                <span class="status-badge badge-completed">✅ Terminée</span>
+            </div>
+            <div class="info-grid">
+                <div class="info-item">
+                    <div class="info-label">Client</div>
+                    <div class="info-value"><i class="fas fa-user"></i> ${o.client}</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Frais encaissés</div>
+                    <div class="info-value"><i class="fas fa-money-bill-wave" style="color:var(--success)"></i> <strong style="color:var(--success)">${formatPrice(o.fraisLivraison || 0)} FCFA</strong></div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Montant commande</div>
+                    <div class="info-value">${formatPrice(o.amount)} FCFA</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Adresse</div>
+                    <div class="info-value"><i class="fas fa-map-marker-alt"></i> ${o.adresse || '—'}</div>
+                </div>
+            </div>
+        </div>
+    `).join('');
+}
+
+// ============================================
+// MODAL — FIXER RDV
+// ============================================
+function openRdvModal(orderId) {
+    activeOrderId = orderId;
+    const all = getSharedOrders();
+    const order = all.find(o => o.id === orderId);
+
+    const now = new Date();
+    now.setHours(now.getHours() + 1);
+    const defaultTime = now.toTimeString().slice(0, 5);
+
+    document.getElementById('rdvModalContent').innerHTML = `
+        <div class="alert-box info" style="margin-bottom:16px;">
+            <i class="fas fa-info-circle"></i>
+            <div>
+                <strong>Commande ${orderId}</strong>
+                <p style="font-size:12px;">Client : ${order ? order.client : ''} | ${order ? formatPrice(order.amount) : 0} FCFA</p>
+            </div>
+        </div>
+        <div class="form-group">
+            <label><i class="fas fa-clock"></i> Heure de passage convenue avec le client</label>
+            <input type="time" id="rdvTime" value="${defaultTime}">
+        </div>
+        <div class="form-group">
+            <label><i class="fas fa-money-bill-wave"></i> Vos frais de livraison (FCFA)</label>
+            <input type="number" id="fraisLivraison" placeholder="Ex: 2000" min="0" value="">
+        </div>
+        <p style="font-size:12px;color:var(--ink-4);margin-top:8px;">💡 Après confirmation, récupérez le colis à UNIMALL et livrez à l'heure convenue.</p>
+    `;
+    document.getElementById('modalRdv').classList.add('active');
+}
+
+function confirmerRdv() {
+    const time = document.getElementById('rdvTime').value;
+    const frais = parseInt(document.getElementById('fraisLivraison').value) || 0;
+
+    if (!time) { showToast("Veuillez saisir l'heure de RDV", 'warning'); return; }
+    if (frais <= 0) { showToast("Veuillez indiquer vos frais de livraison", 'warning'); return; }
+
+    updateOrderInStorage(activeOrderId, {
+        status: 'rdv_fixed',
+        rdvHeure: time,
+        fraisLivraison: frais
+    });
+
+    closeModal('modalRdv');
+    showToast(`✅ RDV fixé à ${time} — Allez récupérer le colis à UNIMALL !`, 'success');
+    loadAll();
+    switchTab('rdv');
+    document.querySelectorAll('.tab-btn')[1].classList.add('active');
+    document.querySelectorAll('.tab-btn')[0].classList.remove('active');
+}
+
+// ============================================
+// MODAL — RÉCUPÉRATION COLIS
+// ============================================
+function openColisModal(orderId) {
+    activeOrderId = orderId;
+    const all = getSharedOrders();
+    const order = all.find(o => o.id === orderId);
+
+    document.getElementById('colisModalContent').innerHTML = `
+        <div class="alert-box warning" style="margin-bottom:16px;">
+            <i class="fas fa-store"></i>
+            <div>
+                <strong>Vous êtes bien à UNIMALL ?</strong>
+                <p style="font-size:12px;margin-top:3px;">ZAD, Avenue Tensoba, Ouagadougou</p>
+            </div>
+        </div>
+
+        <div style="background:var(--surface);border-radius:12px;padding:14px;margin-bottom:14px;">
+            <p style="font-weight:700;margin-bottom:8px;"><i class="fas fa-box" style="color:var(--primary)"></i> Commande ${orderId} — ${order ? order.client : ''}</p>
+            ${order && order.amount ? `<p style="font-size:14px;">Montant : <strong>${formatPrice(order.amount)} FCFA</strong></p>` : ''}
+            ${order && order.rdvHeure ? `<p style="font-size:13px;color:var(--ink-3);">RDV prévu : <strong>${order.rdvHeure}</strong></p>` : ''}
+        </div>
+
+        <div class="alert-box info">
+            <i class="fas fa-clipboard-check"></i>
+            <div>
+                <p style="font-size:13px;"><strong>Vérifiez avant de partir :</strong></p>
+                <ul style="font-size:12px;margin-top:6px;padding-left:16px;">
+                    <li>✅ Colis au nom du bon client</li>
+                    <li>✅ Contenu correspond à la commande</li>
+                    <li>✅ Emballage intact</li>
+                </ul>
+            </div>
+        </div>
+    `;
+    document.getElementById('modalColis').classList.add('active');
+}
+
+function confirmerRecuperation() {
+    updateOrderInStorage(activeOrderId, { status: 'in_progress', colisRecupere: true });
+    closeModal('modalColis');
+    showToast('🚴 Colis récupéré ! En route pour la livraison.', 'success');
+    loadAll();
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.tab-btn')[2].classList.add('active');
+    document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+    document.getElementById('tab-encours').classList.add('active');
+}
+
+// ============================================
+// MODAL — VÉRIFICATION PAIEMENT / DÉPÔT
+// ============================================
+function openPaiementModal(orderId) {
+    activeOrderId = orderId;
+    const all = getSharedOrders();
+    const order = all.find(o => o.id === orderId);
+
+    document.getElementById('paiementModalContent').innerHTML = `
+        <div class="alert-box warning" style="margin-bottom:16px;">
+            <i class="fas fa-exclamation-triangle"></i>
+            <div>
+                <strong>Ne remettez le colis QUE si le dépôt est confirmé !</strong>
+            </div>
+        </div>
+
+        <div style="background:var(--surface);border-radius:12px;padding:14px;margin-bottom:14px;">
+            <p style="font-weight:700;font-size:15px;margin-bottom:8px;">Vérification pour ${order ? order.client : ''}</p>
+            <p style="font-size:14px;">Montant à vérifier : <strong style="color:var(--success);font-size:16px;">${order ? formatPrice(order.amount) : 0} FCFA</strong></p>
+        </div>
+
+        <div class="alert-box info" style="margin-bottom:14px;">
+            <i class="fas fa-mobile-alt"></i>
+            <div>
+                <p style="font-size:13px;font-weight:700;">Comment vérifier le dépôt :</p>
+                <ul style="font-size:12px;margin-top:6px;padding-left:16px;">
+                    <li>Demandez au client de vous montrer le SMS de confirmation du dépôt</li>
+                    <li>Vérifiez le montant exact : <strong>${order ? formatPrice(order.amount) : 0} FCFA</strong></li>
+                    <li>Vérifiez le numéro UNIMALL : <strong>57 36 66 66</strong></li>
+                    <li>Vérifiez la date/heure récente du SMS</li>
+                </ul>
+            </div>
+        </div>
+
+        ${order && order.fraisLivraison ? `
+        <div class="frais-badge">
+            <i class="fas fa-hand-holding-usd"></i>
+            <div>
+                <strong>${formatPrice(order.fraisLivraison)} FCFA</strong>
+                <span>Encaissez vos frais de livraison maintenant</span>
+            </div>
+        </div>` : ''}
+
+        <div class="form-group">
+            <label><i class="fas fa-check-square"></i> Confirmation</label>
+            <select id="paiementConfirm">
+                <option value="">-- Sélectionnez --</option>
+                <option value="confirme">✅ Dépôt confirmé — Le client a bien payé à UNIMALL</option>
+                <option value="probleme">⚠️ Problème — Le client n'a pas encore payé</option>
+            </select>
+        </div>
+    `;
+    document.getElementById('modalPaiement').classList.add('active');
+}
+
+function confirmerPaiementFinal() {
+    const confirm = document.getElementById('paiementConfirm').value;
+
+    if (!confirm) { showToast('Veuillez sélectionner une option', 'warning'); return; }
+
+    if (confirm === 'probleme') {
+        closeModal('modalPaiement');
+        showToast('⚠️ Ne remettez pas le colis. Recontactez UNIMALL.', 'warning');
+        return;
+    }
+
+    const all = getSharedOrders();
+    const order = all.find(o => o.id === activeOrderId);
+    const frais = order ? (order.fraisLivraison || 0) : 0;
+
+    updateOrderInStorage(activeOrderId, {
+        status: 'completed',
+        paiementDepose: true,
+        fraisPayes: true,
+        dateLivraison: new Date().toISOString()
+    });
+
+    currentLivreur.gainsJour += frais;
+    currentLivreur.livraisonsJour += 1;
+
+    closeModal('modalPaiement');
+    showToast(`🎉 Livraison terminée ! +${formatPrice(frais)} FCFA encaissés.`, 'success');
+
+    setTimeout(() => {
+        loadAll();
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.tab-btn')[3].classList.add('active');
+        document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+        document.getElementById('tab-historique').classList.add('active');
+    }, 500);
+}
+
+// ============================================
+// MODALS UTILS
+// ============================================
+function closeModal(modalId) {
+    document.getElementById(modalId).classList.remove('active');
+}
+
+window.addEventListener('click', (e) => {
+    ['modalRdv', 'modalColis', 'modalPaiement'].forEach(id => {
+        const m = document.getElementById(id);
+        if (e.target === m) m.classList.remove('active');
+    });
+});
+
+// ============================================
+// PANEL NOTIFICATIONS
+// ============================================
+function toggleNotifPanel() {
+    document.getElementById('notifPanel').classList.toggle('show');
+}
+
+function loadNotifPanel() {
+    const notifs = getSharedNotifs().filter(n => n.livreurId === currentLivreur.id);
+    const unread = notifs.filter(n => !n.lue).length;
+
+    const badge = document.getElementById('notifCount');
+    badge.textContent = unread;
+    badge.classList.toggle('hidden', unread === 0);
+
+    if (notifs.length === 0) {
+        document.getElementById('notifsList').innerHTML = `<div style="padding:20px;text-align:center;color:var(--ink-4);font-size:13px;">Aucune notification</div>`;
+        return;
+    }
+
+    document.getElementById('notifsList').innerHTML = notifs.map(n => `
+        <div class="notif-item ${n.lue ? '' : 'unread'}" onclick="marquerLu('${n.id}')">
+            <div class="notif-msg">
+                ${n.type === 'nouvelle_mission' ? '🔔 Nouvelle mission :' : '📢'} ${n.client || ''} — ${formatPrice(n.montant || 0)} FCFA
+            </div>
+            <div class="notif-time">${new Date(n.date).toLocaleString('fr-FR', {day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})}</div>
+        </div>
+    `).join('');
+}
+
+function marquerLu(notifId) {
+    const notifs = getSharedNotifs();
+    const n = notifs.find(x => x.id == notifId);
+    if (n) { n.lue = true; setSharedNotifs(notifs); loadNotifPanel(); }
+}
+
+function marquerToutLu() {
+    const notifs = getSharedNotifs().map(n => ({ ...n, lue: true }));
+    setSharedNotifs(notifs);
+    loadNotifPanel();
+}
+
+document.addEventListener('click', (e) => {
+    const panel = document.getElementById('notifPanel');
+    const btn = document.querySelector('.notif-btn');
+    if (panel.classList.contains('show') && !panel.contains(e.target) && !btn.contains(e.target)) {
+        panel.classList.remove('show');
+    }
+});
+
+// ============================================
+// DONNÉES DE DÉMO
+// ============================================
+function injectDemoDataIfEmpty() {
+    const all = getSharedOrders();
+    const mesCommandes = all.filter(o => o.livreurId === currentLivreur.id || o.assignedTo === currentLivreur.id);
+
+    if (mesCommandes.length === 0) {
+        const demo = [
+            {
+                id: 'UNI-1001',
+                client: 'Jean Ouedraogo',
+                amount: 16400,
+                status: 'assigned',
+                payment: 'cash',
+                telephone: '70 12 34 56',
+                adresse: 'Avenue Kwame Nkrumah, Gounghin, Ouagadougou',
+                livreurId: currentLivreur.id,
+                livreurNom: currentLivreur.nom,
+                rdvHeure: null,
+                colisRecupere: false,
+                paiementDepose: false,
+                fraisLivraison: 0,
+                fraisPayes: false,
+                instructions: 'Client disponible en soirée de préférence',
+                dateCreation: new Date().toISOString()
+            },
+            {
+                id: 'UNI-1002',
+                client: 'Marie Kaboré',
+                amount: 24500,
+                status: 'rdv_fixed',
+                payment: 'mobile',
+                telephone: '76 54 32 10',
+                adresse: 'Rue 15.34, Patte d\'Oie, Ouagadougou',
+                livreurId: currentLivreur.id,
+                livreurNom: currentLivreur.nom,
+                rdvHeure: '17:30',
+                colisRecupere: false,
+                paiementDepose: false,
+                fraisLivraison: 2000,
+                fraisPayes: false,
+                instructions: '',
+                dateCreation: new Date(Date.now() - 3600000).toISOString()
+            }
+        ];
+
+        const newAll = [...all, ...demo];
+        setSharedOrders(newAll);
+    }
+}
+
+// ============================================
+// INITIALISATION
+// ============================================
+document.addEventListener('DOMContentLoaded', () => {
+    document.getElementById('livreurNameHeader').textContent = currentLivreur.nom;
+    injectDemoDataIfEmpty();
+    loadAll();
+
+    setInterval(() => {
+        loadAll();
+    }, 10000);
+});
+</script>
+</body>
+</html>
